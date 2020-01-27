@@ -1,0 +1,96 @@
+# This manifest installs the pan install-cni container, as well
+# as the pan CNI plugin and config on
+# each master and worker node in a Kubernetes cluster.
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: pan-cni
+  namespace: kube-system
+  labels:
+    k8s-app: pan-cni
+spec:
+  selector:
+    matchLabels:
+      k8s-app: pan-cni
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: pan-cni
+      annotations:
+        # This, along with the CriticalAddonsOnly toleration below,
+        # marks the pod as a critical add-on, ensuring it gets
+        # priority scheduling and that its resources are reserved
+        # if it ever gets evicted.
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      hostNetwork: true
+      tolerations:
+        # Make sure pan-cni gets scheduled on all nodes.
+        - effect: NoSchedule
+          operator: Exists
+        # Mark the pod as a critical add-on for rescheduling.
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      priorityClassName: system-node-critical
+      serviceAccountName: pan-fw
+      # Minimize downtime during a rolling upgrade or deletion; tell Kubernetes to do a "force
+      # deletion": https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods.
+      terminationGracePeriodSeconds: 5
+      containers:
+        # This container installs the pan CNI binaries
+        # and CNI network config file on each node.
+        - name: install-pan-cni
+          image: <your-private-registry-image-path>
+          imagePullPolicy: Always
+          command: ["/install-pan-cni.sh", "main"]
+          lifecycle:
+            # Before killing the container, executes the below handler
+            preStop:
+              exec:
+                command: ["/install-pan-cni.sh", "cleanup"]
+          env:
+            # The CNI network config to install on each node.
+            - name: CNI_NETWORK_CONFIG
+              valueFrom:
+                configMapKeyRef:
+                  name: pan-cni-config
+                  key: cni_network_config
+            # Name of the primary CNI config file to add our CNI plugin.
+            # This is optional. We always wait until this configured (if
+            # configured) or any cni conf file is detected.
+            - name: CNI_CONF_NAME
+              value: "10-azure.conflist"
+            # This is optional. After pan-cni insertion, delay for it to be
+            # picked up/propogated before makring pan-cni-ready (default 30 seconds)
+            #- name: CNI_READY_DELAY
+            #  value: "10"
+          volumeMounts:
+            - mountPath: /host/opt/cni/bin
+              name: cni-bin-dir
+            - mountPath: /host/etc/cni/net.d
+              name: cni-net-dir
+            - mountPath: /host/appinfo
+              name: appinfo
+      volumes:
+        # Used to install CNI.
+        - name: cni-bin-dir
+          hostPath:
+            path: /opt/cni/bin
+        - name: cni-net-dir
+          hostPath:
+            path: /etc/cni/net.d
+        - name: appinfo
+          hostPath:
+            # app pod info's directory location on host
+            # below path should match pan-cni's "appinfo_dir" configmap and
+            # pan-fw's "appinfo" and part of "pan-cni-ready" volumes
+            path: /var/log/pan-appinfo
+            type: DirectoryOrCreate
