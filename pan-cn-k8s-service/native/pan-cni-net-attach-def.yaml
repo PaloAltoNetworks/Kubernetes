@@ -1,0 +1,5 @@
+# Deploy this with "-n <target-namespace>" for every app pod's namespace
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: pan-cni

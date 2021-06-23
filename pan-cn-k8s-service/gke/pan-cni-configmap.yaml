@@ -1,0 +1,67 @@
+# This ConfigMap is used to configure a self-hosted pan CNI installation.
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: pan-cni-config
+  namespace: kube-system
+data:
+  # The CNI network configuration to add to the plugin chain on each node.  The special
+  # values in this config will be automatically populated.
+  # Some sample options other than the default (follow them by ',' where applicable).
+  #        "appinfo_dir": directory on the node where pan-cni can save application
+  #                       pod info and some logs. Needs to be same as pan-cni.yaml and
+  #                       pan-cn-ngfw.yaml.
+  #        "firewall": list of firewalls pan-cni is supporting. Firewall
+  #                    annotation's <value> 
+  #                      paloaltonetworks.com/firewall: <value>
+  #                    in pan-cn-ngfw.yaml and application pod's yaml (or 
+  #                    namespace) should be listed here.
+  #                    It needs more than one value only when multiple pan-cn-ngfw
+  #                    DaemonSet pods to be run on a node (not a common scenario).
+  #        "interfaces": for multiple interfaces pods, list of interfaces to be
+  #                      secured e.g. ["eth0", "net1", "net3"]
+  #                      Special Values: ["*"] - all interfaces; [] or missing - eth0
+  #        "mode": "daemonset" - normal operation mode
+  #                "teardown" - run in tearing down mode. As pan-cn-ngfw pod exits
+  #                             or starts, it will cleanup all info.
+  #                 "service" - run in CN-Series V2, FW as a service in K8S environment
+  #        "dpservicename":  This is need if mode is "service". It is the name of the DP
+  #                          service deployed.
+  #        "dpservicenamespace": - This is need if mode is "service". It is the namespace of the DP
+  #                          service deployed.
+  #        "passiprange": List of ip ranges which dont need to go to the DP firewall pod
+  #                        e.g "passiprange": "10.52.0.0/14,10.56.0.0/20"      
+  #        "maxpod_failover": "failopen" - when max pods are being served, bypass
+  #                                        firewall for the new pods. Defaults to
+  #                                        wait/block on free spot.
+  #        "override_mtu": Override the mtu used in the application pod. Defaults to auto mtu detection.
+  #        "kubernetes": {
+  #           "security_namespaces": All possible namespaces where pan-cn-ngfw
+  #                    DaemonSets can be deployed (not application pod's namespace).
+  #                    e.g. "security_namespaces": [ "kube-system", "pan-system"]
+  #           "exclude_namespaces": Don't secure the listed namespaces (ignores
+  #                    application pod's annotation in that namespace).
+  #        }
+  cni_network_config: |-
+        {
+          "cniVersion": "0.3.0",
+          "name": "pan-cni",
+          "type": "pan-cni",
+          "log_level": "debug",
+          "appinfo_dir": "/var/log/pan-appinfo",
+          "mode": "service",
+          "cloud": "gke",
+          "dpservicename": "pan-ngfw-svc",
+          "dpservicenamespace": "kube-system",
+          "firewall": [ "pan-fw" ],
+          "interfaces": ["eth0"],
+          "interfacesip": [""],
+          "interfacesmac": [""],
+          "override_mtu": "",
+          "kubernetes": {
+              "kubeconfig": "__KUBECONFIG_FILEPATH__",
+              "cni_bin_dir": "/home/kubernetes/bin",
+              "exclude_namespaces": [ ],
+              "security_namespaces": [ "kube-system"]
+          }
+        }
