@@ -106,6 +106,8 @@ For HPA in EKS environment, it's expected users would want to customize the YAML
   - update the pan-cn-hpa-mp.yaml with all metrics to be used for scaling mp, provided yaml only contains single metric for example
   - provided pan-cn-hpa-mp.yaml and pan-cn-hpa-dp.yaml contain scaling policies which ensure 1 pod is being scaled up/down at a time, update the policies for scaling if more pods needs to be scaled. Value provided for periodSeconds to scaleup is base
 d on max time pod takes to be in ready state
+  - allow CloudWatch complete access to both IAM roles associated with your Kubernetes pods and clusters.
+  - the worker nodes’ role need to have the AWS managed policy ‘CloudwatchAgentServerPolicy’  to be able to publish the custom metrics to Cloudwatch so the HPA can pull them
 EKS
 ```
 kubectl apply -f pan-cn-adapter.yaml

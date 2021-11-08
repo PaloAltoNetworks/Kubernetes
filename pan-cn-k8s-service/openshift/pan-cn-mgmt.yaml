@@ -23,7 +23,7 @@ spec:
     matchLabels:
       appname: pan-mgmt-sts
   serviceName: pan-mgmt-svc
-  # Replicas are for fault-tolerance. Max 2 replicas supported
+  # Replicas are for fault-tolerance. Max 2 replicas supported.
   replicas: 2
   updateStrategy:
     type: RollingUpdate
@@ -147,6 +147,10 @@ spec:
           envFrom:
           - configMapRef:
               name: pan-mgmt-config
+          # Uncomment the below 3 lines to enable HPA
+          #envFrom:
+          #- configMapRef:
+          #    name: pan-hpa-config
           env:
           - name: MY_POD_UID
             valueFrom:
@@ -186,47 +190,19 @@ spec:
   - metadata:
       name: panlogs
     spec:
+      #storageClassName: pan-cn-storage-class //For better disk iops performance for logging
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 20Gi
-      # Note: Use of dynamically provisioned PVs is strongly recommend.
-      # Disable storageClassName to use dynamically provisioned PVs.
-      #
-      # Enable this to use manual PVs (for single node clusters only), after
-      # deploying manual PVs with matching storage capacities (can use 
-      # provided pan-cn-pv-manual.yaml as is).
-      #storageClassName: manual
-      #
-      # Enable this to use Local PVs, after deploying pan-local-storage 
-      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
-      # after creating the mount point on the host nodes for local PVs .
-      storageClassName: pan-local-storage
-      selector:
-        matchLabels:
-            pv: panlogs
+          storage: 20Gi #Change this to 200Gi while using storageClassName for better iops
   - metadata:
       name: varlogpan
     spec:
+      #storageClassName: pan-cn-storage-class //For better disk iops performance for dp logs
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 20Gi
-      # Note: Use of dynamically provisioned PVs is strongly recommend.
-      # Disable storageClassName to use dynamically provisioned PVs.
-      #
-      # Enable this to use manual PVs (for single node clusters only), after
-      # deploying manual PVs with matching storage capacities (can use 
-      # provided pan-cn-pv-manual.yaml as is).
-      #storageClassName: manual
-      #
-      # Enable this to use Local PVs, after deploying pan-local-storage 
-      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
-      # after creating the mount point on the host nodes for local PVs .
-      storageClassName: pan-local-storage
-      selector:
-        matchLabels:
-            pv: panvarlog
+          storage: 20Gi #Change this to 200Gi while using storageClassName for better iops
   - metadata:
       name: varcores
     spec:
@@ -234,21 +210,6 @@ spec:
       resources:
         requests:
           storage: 2Gi
-      # Note: Use of dynamically provisioned PVs is strongly recommend.
-      # Disable storageClassName to use dynamically provisioned PVs.
-      #
-      # Enable this to use manual PVs (for single node clusters only), after
-      # deploying manual PVs with matching storage capacities (can use 
-      # provided pan-cn-pv-manual.yaml as is).
-      #storageClassName: manual
-      #
-      # Enable this to use Local PVs, after deploying pan-local-storage 
-      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
-      # after creating the mount point on the host nodes for local PVs .
-      storageClassName: pan-local-storage
-      selector:
-        matchLabels:
-            pv: panvarcores
   - metadata:
       name: panplugincfg
     spec:
@@ -256,21 +217,6 @@ spec:
       resources:
         requests:
           storage: 1Gi
-      # Note: Use of dynamically provisioned PVs is strongly recommend.
-      # Disable storageClassName to use dynamically provisioned PVs.
-      #
-      # Enable this to use manual PVs (for single node clusters only), after
-      # deploying manual PVs with matching storage capacities (can use 
-      # provided pan-cn-pv-manual.yaml as is).
-      #storageClassName: manual
-      #
-      # Enable this to use Local PVs, after deploying pan-local-storage 
-      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
-      # after creating the mount point on the host nodes for local PVs .
-      storageClassName: pan-local-storage
-      selector:
-        matchLabels:
-            pv: panplugincfg
   - metadata:
       name: panconfig
     spec:
@@ -278,21 +224,6 @@ spec:
       resources:
         requests:
           storage: 8Gi
-      # Note: Use of dynamically provisioned PVs is strongly recommend.
-      # Disable storageClassName to use dynamically provisioned PVs.
-      #
-      # Enable this to use manual PVs (for single node clusters only), after
-      # deploying manual PVs with matching storage capacities (can use 
-      # provided pan-cn-pv-manual.yaml as is).
-      #storageClassName: manual
-      #
-      # Enable this to use Local PVs, after deploying pan-local-storage 
-      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
-      # after creating the mount point on the host nodes for local PVs .
-      storageClassName: pan-local-storage
-      selector:
-        matchLabels:
-            pv: panconfig
   - metadata:
       name: panplugins
     spec:
@@ -300,18 +231,3 @@ spec:
       resources:
         requests:
           storage: 200Mi
-      # Note: Use of dynamically provisioned PVs is strongly recommend.
-      # Disable storageClassName to use dynamically provisioned PVs.
-      #
-      # Enable this to use manual PVs (for single node clusters only), after
-      # deploying manual PVs with matching storage capacities (can use 
-      # provided pan-cn-pv-manual.yaml as is).
-      #storageClassName: manual
-      #
-      # Enable this to use Local PVs, after deploying pan-local-storage 
-      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
-      # after creating the mount point on the host nodes for local PVs .
-      storageClassName: pan-local-storage
-      selector:
-        matchLabels:
-            pv: panplugins

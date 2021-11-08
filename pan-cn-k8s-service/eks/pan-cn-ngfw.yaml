@@ -13,6 +13,8 @@ spec:
   selector:
     matchLabels:
       app: pan-ngfw
+  # min replicas set to 2
+  replicas: 2
   template:
     metadata:
       labels:

@@ -27,12 +27,17 @@ spec:
           # This needs to be in the list of "firewall" in pan-cni-configmap.yaml
           paloaltonetworks.com/firewall: pan-fw
 
-          # Below annotation is always fixed and is used to detect this Deployment.
+          # Below annotation is always fixed and is used to detect this Daemonset.
           #     paloaltonetworks.com/app: pan-fw
+          # After k8s plugin change, change this to following to avoid confusion:
+          #     paloaltonetworks.com/app: pan-ngfw-app
           paloaltonetworks.com/app: pan-fw
 
-          # If multus CNI is present, this annotation is needed to enable
-          # pan-cni CNI plugin for this pod, otherwise no impact.
+          # This annotation enables pan-cni CNI plugin for this pod
+          # This needs to be done after NetworkAttachmentDefinition pan-cni
+          # (pan-cni-net-attach-def.yaml) has been deployed in the same
+          # namespace as this pod.
+          # These 2 steps are needed for app pod and their namespace as well.
           k8s.v1.cni.cncf.io/networks: pan-cni
     spec:
       priorityClassName: system-cluster-critical
@@ -74,8 +79,9 @@ spec:
           imagePullPolicy: Always
           securityContext:
             capabilities:
-              #add: ["NET_ADMIN","NET_RAW","NET_BROADCAST","NET_BIND_SERVICE"]
               add: ["ALL"]
+            privileged: true
+            runAsNonRoot: false
           resources:
             requests:
               # configurable based on desired throughput, number of running pods
@@ -87,8 +93,6 @@ spec:
           volumeMounts:
           - mountPath: /opt/appinfo
             name: appinfo
-          - mountPath: /opt/pan-cni-ready
-            name: pan-cni-ready
           - mountPath: /dev/net/tun
             name: devnettun
             readOnly: false
@@ -160,11 +164,6 @@ spec:
           # below path should match pan-cni's "appinfo" volume and 
           # "appinfo_dir" configmap and pan-ngfw-ds's part of "pan-cni-ready" volume
           path: /var/log/pan-appinfo
-          type: Directory
-      - name: pan-cni-ready
-        hostPath:
-          # block pan-ngfw-ds scheduling till PAN CNI plugin insertion on the node
-          path: /var/log/pan-appinfo/pan-cni-ready
           type: Directory
       - name: sw-secret
         secret:

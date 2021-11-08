@@ -1,4 +1,4 @@
-apiVersion: "paloaltonetworks.com/v1alpha1"
+apiVersion: "paloaltonetworks.com/v1"
 kind: PortInfo
 metadata:
   name: "bypassfirewall"

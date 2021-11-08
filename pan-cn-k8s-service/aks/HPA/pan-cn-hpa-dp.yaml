@@ -9,8 +9,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: pan-ngfw-dep
-  minReplicas: 1
-  maxReplicas: 10
+  minReplicas: 2 # Ensure to change this "minReplicas" to same as "replicas" in pan-cn-ngfw.yaml
+  maxReplicas: 30
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
