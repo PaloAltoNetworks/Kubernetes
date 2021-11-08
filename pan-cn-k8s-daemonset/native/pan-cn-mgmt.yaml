@@ -1,0 +1,317 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pan-mgmt-svc
+  namespace: kube-system
+  labels:
+    app: pan-mgmt-svc
+spec:
+  ports:
+  - protocol: UDP
+    port: 4500
+    name: ipsec
+  selector:
+    appname: pan-mgmt-sts
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pan-mgmt-sts
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      appname: pan-mgmt-sts
+  serviceName: pan-mgmt-svc
+  # Replicas are for fault-tolerance. Max 2 replicas supported.
+  replicas: 2
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app: pan-mgmt
+        appname: pan-mgmt-sts
+      annotations:
+          paloaltonetworks.com/app: pan-mgmt
+    spec:
+      serviceAccountName: pan-mgmt-sa
+      priorityClassName: system-node-critical
+      #terminationGracePeriodSeconds: 60 //for graceful exit of prestop hook
+      # Turn on podAntiAffinity to schedule replicas on separate nodes
+      # Turn off podAntiAffinity to allow scheduling of both replicas on a single node
+      affinity:
+       podAntiAffinity:
+         requiredDuringSchedulingIgnoredDuringExecution:
+           - labelSelector:
+               matchExpressions:
+                 - key: "appname"
+                   operator: In
+                   values:
+                   - pan-mgmt-sts
+             topologyKey: "kubernetes.io/hostname"
+      initContainers:
+        - name: pan-mgmt-init
+          image: <your-private-registry-image-path>
+          command: ["/usr/bin/pan_start.sh"]
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["ALL"]
+          volumeMounts:
+          - name: panconfig
+            mountPath: /opt/pancfg/
+          - name: varlogpan
+            mountPath: /var/log/pan/
+          envFrom:
+          - configMapRef:
+              name: pan-mgmt-config
+          env:
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: MY_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          - name: PAN_DP_NAME
+            # Don't change this. Needs to match the prefix in secret volume
+            # sw-secret in pan-cn-ngfw.yaml and hard-coded in ipsec.conf
+            value: pan-fw
+      containers:
+        - name: pan-mgmt
+          image: <your-private-registry-image-path>
+          terminationMessagePolicy: FallbackToLogsOnError
+          command: ["/sbin/pan_start"]
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/sbin/pan_shutdown"]
+          readinessProbe:
+            exec:
+              command: ["/sbin/pan_ready_check"]
+            initialDelaySeconds: 30
+            periodSeconds: 2
+            failureThreshold: 2
+            successThreshold: 2
+          livenessProbe:
+            exec:
+              command: ["/sbin/pan_alive_check"]
+            initialDelaySeconds: 600 #covers image download and panos start
+            periodSeconds: 5
+            failureThreshold: 2
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["ALL"]
+          resources:
+            requests:
+              # configurable based on desired logging, capacities
+              cpu: "2"
+              memory: "2.0Gi"
+            limits:
+              cpu: "4"
+              memory: "4.0Gi"
+          volumeMounts:
+          - name: panlogs
+            mountPath: /opt/panlogs/
+          - name: varlogpan
+            mountPath: /var/log/pan/
+          - name: varcores
+            mountPath: /var/cores/
+          - name: panconfig
+            mountPath: /opt/pancfg/
+          - name: panplugins
+            mountPath: /opt/plugins/installed/
+          - name: panplugincfg
+            mountPath: /opt/pancfg/mgmt/plugins/
+          - name: panplugincfg
+            mountPath: /opt/plugins/opt/pancfg/mgmt/plugins/
+          - mountPath: /dev/shm
+            name: dshm
+          # Optional for custom cert
+          - name: pancustomca
+            mountPath: /etc/custom-ca
+          envFrom:
+          - configMapRef:
+              name: pan-mgmt-config
+          env:
+          - name: MY_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: MY_POD_SERVICE_ACCOUNT
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.serviceAccountName
+          - name: MY_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+ 
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+      # Optional for custom cert - Pass custom CA cert as a secret with file name ca.crt
+      - name: pancustomca
+        secret:
+          secretName: custom-ca-secret
+          optional: true
+  volumeClaimTemplates:
+  - metadata:
+      name: panlogs
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 20Gi
+      # Note: Use of dynamically provisioned PVs is strongly recommend.
+      # Disable storageClassName to use dynamically provisioned PVs.
+      #
+      # Enable this to use manual PVs (for single node clusters only), after
+      # deploying manual PVs with matching storage capacities (can use 
+      # provided pan-cn-pv-manual.yaml as is).
+      #storageClassName: manual
+      #
+      # Enable this to use Local PVs, after deploying pan-local-storage 
+      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
+      # after creating the mount point on the host nodes for local PVs .
+      storageClassName: pan-local-storage
+      selector:
+        matchLabels:
+            pv: panlogs
+  - metadata:
+      name: varlogpan
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 20Gi
+      # Note: Use of dynamically provisioned PVs is strongly recommend.
+      # Disable storageClassName to use dynamically provisioned PVs.
+      #
+      # Enable this to use manual PVs (for single node clusters only), after
+      # deploying manual PVs with matching storage capacities (can use 
+      # provided pan-cn-pv-manual.yaml as is).
+      #storageClassName: manual
+      #
+      # Enable this to use Local PVs, after deploying pan-local-storage 
+      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
+      # after creating the mount point on the host nodes for local PVs .
+      storageClassName: pan-local-storage
+      selector:
+        matchLabels:
+            pv: panvarlog
+  - metadata:
+      name: varcores
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi
+      # Note: Use of dynamically provisioned PVs is strongly recommend.
+      # Disable storageClassName to use dynamically provisioned PVs.
+      #
+      # Enable this to use manual PVs (for single node clusters only), after
+      # deploying manual PVs with matching storage capacities (can use 
+      # provided pan-cn-pv-manual.yaml as is).
+      #storageClassName: manual
+      #
+      # Enable this to use Local PVs, after deploying pan-local-storage 
+      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
+      # after creating the mount point on the host nodes for local PVs .
+      storageClassName: pan-local-storage
+      selector:
+        matchLabels:
+            pv: panvarcores
+  - metadata:
+      name: panplugincfg
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+      # Note: Use of dynamically provisioned PVs is strongly recommend.
+      # Disable storageClassName to use dynamically provisioned PVs.
+      #
+      # Enable this to use manual PVs (for single node clusters only), after
+      # deploying manual PVs with matching storage capacities (can use 
+      # provided pan-cn-pv-manual.yaml as is).
+      #storageClassName: manual
+      #
+      # Enable this to use Local PVs, after deploying pan-local-storage 
+      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
+      # after creating the mount point on the host nodes for local PVs .
+      storageClassName: pan-local-storage
+      selector:
+        matchLabels:
+            pv: panplugincfg
+  - metadata:
+      name: panconfig
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 8Gi
+      # Note: Use of dynamically provisioned PVs is strongly recommend.
+      # Disable storageClassName to use dynamically provisioned PVs.
+      #
+      # Enable this to use manual PVs (for single node clusters only), after
+      # deploying manual PVs with matching storage capacities (can use 
+      # provided pan-cn-pv-manual.yaml as is).
+      #storageClassName: manual
+      #
+      # Enable this to use Local PVs, after deploying pan-local-storage 
+      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
+      # after creating the mount point on the host nodes for local PVs .
+      storageClassName: pan-local-storage
+      selector:
+        matchLabels:
+            pv: panconfig
+  - metadata:
+      name: panplugins
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 200Mi
+      # Note: Use of dynamically provisioned PVs is strongly recommend.
+      # Disable storageClassName to use dynamically provisioned PVs.
+      #
+      # Enable this to use manual PVs (for single node clusters only), after
+      # deploying manual PVs with matching storage capacities (can use 
+      # provided pan-cn-pv-manual.yaml as is).
+      #storageClassName: manual
+      #
+      # Enable this to use Local PVs, after deploying pan-local-storage 
+      # storageclass and PVs (refer provided pan-cn-pv-local.yaml) and 
+      # after creating the mount point on the host nodes for local PVs .
+      storageClassName: pan-local-storage
+      selector:
+        matchLabels:
+            pv: panplugins

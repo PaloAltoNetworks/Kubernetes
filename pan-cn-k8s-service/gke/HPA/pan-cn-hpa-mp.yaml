@@ -1,0 +1,50 @@
+#Refer to README for more details on HPA
+#substitute  <HPA_NAME> with unique hpa name provided in pan-cn-mgmt-configmap
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-mp-gke
+  namespace: kube-system
+spec:
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: pan-mgmt-sts
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 60
+      - type: Percent
+        value: 1
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 480 # assuming 8 mins for mp to be ready
+      - type: Percent
+        value: 1
+        periodSeconds: 480 # assuming 8 mins for mp to be ready
+      selectPolicy: Max
+  metrics:
+  - type: External
+    external:
+      metric:
+        name: custom.googleapis.com|cnseries|<HPA_NAME>|panloggingrate
+      target:
+        type: Value
+        value: 25
+  - type: External
+    external:
+      metric:
+        name: custom.googleapis.com|cnseries|<HPA_NAME>|pandataplaneslots
+      target:
+        type: Value
+        value: 25

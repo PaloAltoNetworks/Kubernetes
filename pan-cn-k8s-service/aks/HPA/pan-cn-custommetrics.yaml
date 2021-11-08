@@ -1,0 +1,92 @@
+#Refer to README for more details on HPA
+#substitute  <HPA_NAME> with unique hpa name provided in pan-cn-mgmt-configmap
+apiVersion: azure.com/v1alpha2
+kind: CustomMetric
+metadata:
+  name: dataplanecpuutilizationpct
+  namespace: kube-system
+spec:
+  metric:
+    metricName: "customMetrics/<HPA_NAME>-dataplanecpuutilizationpct"
+---
+apiVersion: azure.com/v1alpha2
+kind: CustomMetric
+metadata:
+  name: dataplanepacketbufferutilization
+  namespace: kube-system
+spec:
+  metric:
+    metricName: "customMetrics/<HPA_NAME>-dataplanepacketbufferutilization"
+---
+apiVersion: azure.com/v1alpha2
+kind: CustomMetric
+metadata:
+  name: pansessionactive
+  namespace: kube-system
+spec:
+  metric:
+    metricName: "customMetrics/<HPA_NAME>-pansessionactive"
+---
+apiVersion: azure.com/v1alpha2
+kind: CustomMetric
+metadata:
+  name: pansessionutilization
+  namespace: kube-system
+spec:
+  metric:
+    metricName: "customMetrics/<HPA_NAME>-pansessionutilization"
+---
+apiVersion: azure.com/v1alpha2
+kind: CustomMetric
+metadata:
+  name: pansessionsslproxyutilization
+  namespace: kube-system
+spec:
+  metric:
+    metricName: "customMetrics/<HPA_NAME>-pansessionsslproxyutilization"
+---
+apiVersion: azure.com/v1alpha2
+kind: CustomMetric
+metadata:
+  name: panthroughput
+  namespace: kube-system
+spec:
+  metric:
+    metricName: "customMetrics/<HPA_NAME>-panthroughput"
+---
+apiVersion: azure.com/v1alpha2
+kind: CustomMetric
+metadata:
+  name: panpacketrate
+  namespace: kube-system
+spec:
+  metric:
+    metricName: "customMetrics/<HPA_NAME>-panpacketrate"
+---
+apiVersion: azure.com/v1alpha2
+kind: CustomMetric
+metadata:
+  name: panconnectionspersecond
+  namespace: kube-system
+spec:
+  metric:
+    metricName: "customMetrics/<HPA_NAME>-panconnectionspersecond"
+---
+apiVersion: azure.com/v1alpha2
+kind: CustomMetric
+metadata:
+  name: panloggingrate
+  namespace: kube-system
+spec:
+  metric:
+    metricName: "customMetrics/<HPA_NAME>-panloggingrate"
+---
+apiVersion: azure.com/v1alpha2
+kind: CustomMetric
+metadata:
+  name: pandataplaneslots
+  namespace: kube-system
+spec:
+  metric:
+    metricName: "customMetrics/<HPA_NAME>-pandataplaneslots"
+---
