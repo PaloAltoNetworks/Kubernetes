@@ -139,9 +139,6 @@ spec:
             mountPath: /opt/pancfg/mgmt/plugins/
           - name: panplugincfg
             mountPath: /opt/plugins/opt/pancfg/mgmt/plugins/
-          - name: devnettun
-            mountPath: /dev/net/tun
-            readOnly: false
           - mountPath: /dev/shm
             name: dshm
           # Optional for custom cert
@@ -177,9 +174,6 @@ spec:
                 fieldPath: spec.nodeName
  
       volumes:
-      - name: devnettun
-        hostPath:
-          path: /dev/net/tun
       - name: dshm
         emptyDir:
           medium: Memory
