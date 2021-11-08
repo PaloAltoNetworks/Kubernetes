@@ -18,6 +18,9 @@ data:
   #                    namespace) should be listed here.
   #                    It needs more than one value only when multiple pan-cn-ngfw
   #                    DaemonSet pods to be run on a node (not a common scenario).
+  #        "interfaces": for multiple interfaces pods, list of interfaces to be
+  #                      secured e.g. ["eth0", "net1", "net3"]
+  #                      Special Values: ["*"] - all interfaces; [] or missing - eth0
   #        "mode": "daemonset" - normal operation mode
   #                "teardown" - run in tearing down mode. As pan-cn-ngfw pod exits
   #                             or starts, it will cleanup all info.

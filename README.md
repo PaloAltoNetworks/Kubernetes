@@ -61,3 +61,4 @@ Refer to the deployment documentations for more details on it.
 
 - [CN-Series Deployment](<https://docs.paloaltonetworks.com/cn-series/10-0/cn-series-deployment.html>)
 - [CN-Series Datasheet](<https://www.paloaltonetworks.com/resources/datasheets/cn-series-container-firewall>)
+
