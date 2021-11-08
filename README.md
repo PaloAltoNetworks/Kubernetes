@@ -48,12 +48,15 @@ To enable the security for the application pods, apply the following annotation 
 kubectl annotate namespace default paloaltonetworks.com/firewall=pan-fw
 ```
 
-**OpenShift**
+**Multus and OpenShift**
 
-OpenShift has multus CNI acting as a "meta-plugin", that calls other CNI plugins. To make PAN-CNI plugin work with multus, these 2 extra steps are needed for the application pods:
+Multus CNI acts as a "meta-plugin", that calls other CNI plugins. OpenShift comes with multus enabled, so its pan-cni.yaml takes care of that.
+For platforms where Multus is optional and supported e.g. self-managed (native), a separate pan-cni-multus.yaml is provided which should be used instead of pan-cni.yaml.
+
+To make PAN-CNI plugin work with multus, these 2 extra steps are needed for the application pods:
   - A NetworkAttachmentDefinition "pan-cni" needs to be deployed in every app pod's namespace
    ```kubectl apply -f pan-cni-net-attach-def.yaml -n <target-namespace>``` 
-  - An annotation ```k8s.v1.cni.cncf.io/networks: pan-cni``` in app pod yaml
+  - An annotation ```k8s.v1.cni.cncf.io/networks: pan-cni``` in the app pod yaml
 
 Refer to the deployment documentations for more details on it.
 

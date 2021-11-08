@@ -32,3 +32,11 @@ data:
   
   # Override auto-detect of jumbo-frame mode and force enable system-wide
   #PAN_JUMBO_FRAME_ENABLED: "true"
+  
+  # Start MGMT pod with GTP enabled. For complete functionality, need GTP 
+  # enable at Panorama as well.
+  #PAN_GTP_ENABLED: "true"
+  
+  # Enable high feature capacities. These need high memory for MGMT pod and
+  # higher/matching memory than specified below for NGFW pod.
+  #PAN_NGFW_MEMORY="40Gi"

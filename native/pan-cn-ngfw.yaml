@@ -27,9 +27,11 @@ spec:
 
           # Below annotation is always fixed and is used to detect this Daemonset.
           #     paloaltonetworks.com/app: pan-fw
-          # After k8s plugin change, change this to following to avoid confusion:
-          #     paloaltonetworks.com/app: pan-ngfw-app
           paloaltonetworks.com/app: pan-fw
+
+          # If multus CNI is present, this annotation is needed to enable
+          # pan-cni CNI plugin for this pod, otherwise no impact.
+          k8s.v1.cni.cncf.io/networks: pan-cni
     spec:
       priorityClassName: system-cluster-critical
       # Minimize downtime during a rolling upgrade or deletion; Can tell Kubernetes

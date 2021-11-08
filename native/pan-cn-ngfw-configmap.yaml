@@ -12,3 +12,14 @@ data:
   #IPSEC_CERT_BYPASS: ""            # No values needed
   
   #IPSEC_NAT_PORT_RANGE: "4500-4500"    # port range to avoid stale connections
+
+  # Enable/Disable cpu pinning of the forwarding processes (default physical
+  # cpus) (different from K8S cpu pinning of the pods)
+  PAN_CPU_PINNING_ENABLED: "false"
+
+  # When doing cpu pinning of forwarding processes, use logical cpus as well
+  #PAN_HYPERTHREADING_ENABLED: "true"
+      
+  # When doing cpu pinning of forwarding processes, skip the lower numbered cpus
+  # and start from this cpu
+  #PAN_CPU_PINNING_BASE: "1"
