@@ -1,0 +1,7 @@
+apiVersion: "paloaltonetworks.com/v1"
+kind: PortInfo
+metadata:
+  name: "bypassfirewall"
+  namespace: kube-system
+spec:
+  portinfo: "TCP:8080,TCP:8081"

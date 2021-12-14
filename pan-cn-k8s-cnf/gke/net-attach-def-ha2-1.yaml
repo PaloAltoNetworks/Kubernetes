@@ -1,0 +1,23 @@
+# For HA2 interface on MP-DP-1
+# Update the static IP address and PCI ID of the HA2 interface
+# add this to the net-attach list in pan-cn-ngfw-1.yaml
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: pan-ha-net-attach-1
+  namespace: kube-system
+spec:
+  config: |
+    {
+      "cniVersion": "0.3.1",
+      "type": "host-device",
+      "pciBusID": "0000:00:07.0",
+      "ipam": {
+         "type": "static",
+         "addresses": [
+          {
+            "address": "10.10.10.123/32"
+          }
+         ]
+       }
+    }

@@ -1,0 +1,379 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: pan-local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+# Repeat the below yaml for each volumes.
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panlogs-pv1
+  labels:
+    type: local
+    pv: panlogs0
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 20Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local1"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-1
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panlogs-pv2
+  labels:
+    type: local
+    pv: panlogs1
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 20Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local1"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-2
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panvarlog-pv1
+  labels:
+    type: local
+    pv: panvarlog0
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 20Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local2"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-1
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panvarlog-pv2
+  labels:
+    type: local
+    pv: panvarlog1
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 20Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local2"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-2
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panvarcores-pv1
+  labels:
+    type: local
+    pv: panvarcores0
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local3"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-1
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panvarcores-pv2
+  labels:
+    type: local
+    pv: panvarcores1
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local3"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-2
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panplugincfg-pv1
+  labels:
+    type: local
+    pv: panplugincfg0
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local4"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-1
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panplugincfg-pv2
+  labels:
+    type: local
+    pv: panplugincfg1
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local4"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-2
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panconfig-pv1
+  labels:
+    type: local
+    pv: panconfig0
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 8Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local5"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-1
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panconfig-pv2
+  labels:
+    type: local
+    pv: panconfig1
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 8Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local5"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-2
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panplugins-pv1
+  labels:
+    type: local
+    pv: panplugins0
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 200Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local6"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-1
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: panplugins-pv2
+  labels:
+    type: local
+    pv: panplugins1
+spec:
+  storageClassName: pan-local-storage
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 200Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    # These directories path need to be created on the selected nodes, as below,
+    # with local volumes
+    path: "/mnt/pan-local6"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # replace these with actual hostnames or nodes labels where local
+        # volumes are avilable for MGMT pods. K8S wil schedule MGMT pods on
+        # these nodes only.
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker-node-2

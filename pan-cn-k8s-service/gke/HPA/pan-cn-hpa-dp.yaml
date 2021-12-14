@@ -1,0 +1,93 @@
+#Refer to README for more details on HPA
+#substitute  <HPA_NAME> with unique hpa name provided in pan-cn-mgmt-configmap
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-dp-gke
+  namespace: kube-system
+spec:
+  minReplicas: 2 # Ensure to change this "minReplicas" to same as "replicas" in pan-cn-ngfw.yaml
+  # Provide the max number of firewalls to be scaled
+  maxReplicas: 30
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pan-ngfw-dep
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 60
+      - type: Percent
+        value: 1
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 300 # assuming 5 mins for dp to be ready
+      - type: Percent
+        value: 1
+        periodSeconds: 300 # assuming 5 mins for dp to be ready
+      selectPolicy: Max
+  metrics:
+  - type: External
+    external:
+      metric:
+        name: custom.googleapis.com|cnseries|<HPA_NAME>|dataplanecpuutilizationpct
+      target:
+        type: Value
+        value: 25
+  - type: External
+    external:
+      metric:
+        name: custom.googleapis.com|cnseries|<HPA_NAME>|dataplanepacketbufferutilization
+      target:
+        type: Value
+        value: 25
+  - type: External
+    external:
+      metric:
+        name: custom.googleapis.com|cnseries|<HPA_NAME>|pansessionactive
+      target:
+        type: Value
+        value: 25
+  - type: External
+    external:
+      metric:
+        name: custom.googleapis.com|cnseries|<HPA_NAME>|pansessionutilization
+      target:
+        type: Value
+        value: 25
+  - type: External
+    external:
+      metric:
+        name: custom.googleapis.com|cnseries|<HPA_NAME>|pansessionsslproxyutilization
+      target:
+        type: Value
+        value: 25
+  - type: External
+    external:
+      metric:
+        name: custom.googleapis.com|cnseries|<HPA_NAME>|panthroughput
+      target:
+        type: Value
+        value: 25
+  - type: External
+    external:
+      metric:
+        name: custom.googleapis.com|cnseries|<HPA_NAME>|panpacketrate
+      target:
+        type: Value
+        value: 25
+  - type: External
+    external:
+      metric:
+        name: custom.googleapis.com|cnseries|<HPA_NAME>|panconnectionspersecond
+      target:
+        type: Value
+        value: 25
