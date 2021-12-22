@@ -13,7 +13,7 @@ spec:
       metricStat:
         metric:
           namespace: "<PAN_NAMESPACE_EKS>"
-          metricName: "dataplanecpuUtilizationpct"
+          metricName: "dataplanecpuutilizationpct"
         period: 300
         stat: Average
         unit: Count
