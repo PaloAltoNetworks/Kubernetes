@@ -13,7 +13,7 @@ data:
   PAN_DEVICE_GROUP: "<panorama-device-group>"
   PAN_TEMPLATE_STACK: "<panorama-template-stack>"
   PAN_CGNAME: "<panorama-collector-group>"
-  PAN_CTNR_MODE_TYPE: "k8s-deployment" # Will be changed to 'k8s-cnf'
+  PAN_CTNR_MODE_TYPE: "k8s-cnf"
 
 
 #Non-mandatory parameters
