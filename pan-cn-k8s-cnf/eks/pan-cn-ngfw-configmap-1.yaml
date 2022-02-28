@@ -9,9 +9,8 @@ data:
   DP_RINGBUFFER: "60000"            # buffer count for memory/performance control
   PAN_CTNR_MODE_TYPE: "k8s-cnf"
   #PAN_DATA_MODE: "dpdk"            # HUGEPAGE_MEMORY_REQUEST is also needed
-  #HUGEPAGE_MEMORY_REQUEST: "1024"  # in MB - needed for DPDK mode - should be same as hugepage request in pan-cn-ngfw.yaml - might change after 1.20
-  #PAN_HA_SUPPORT: "true"
-
+  #HUGEPAGE_MEMORY_REQUEST: "4096"  # in MB - needed for DPDK mode - should be same as hugepage request in pan-cn-ngfw.yaml - might change after 1.20
+                                    # Refer to the system requirements documentation to see the minimum value needed for different capacity profiles.
   
   # Comment out to use CERTs otherwise PSK for IPSec between pan-mgmt and pan-ngfw
   #IPSEC_CERT_BYPASS: ""            # No values needed

@@ -20,9 +20,9 @@ spec:
       annotations:
           # net-attach list defines the interface mapping order. 
           # Interfaces are mapped starting with eth1/1
-          # If PAN_HA_SUPPORT=yes in pan-cn-mgmt-configmap-0.yaml
-          # add pan-ha-net-attach-0 as the first item in the below list, to map it to eth1/1.
-        k8s.v1.cni.cncf.io/networks: net-attach-1,net-attach-2,net-attach-3
+          # If PAN_HA_SUPPORT=yes in pan-cn-mgmt-configmap-1.yaml then
+          # add HA net attachment as the first item in the below list, to map HA2 to ethernet1/1.
+        k8s.v1.cni.cncf.io/networks: <List of net attachments ex- net-attach-1,net-attach-2,net-attach-3>
           # Application Pods and Namespaces with annotation
           #     paloaltonetworks.com/firewall: pan-fw*
           # will be secured when this daemonset is running with exact same
@@ -36,7 +36,7 @@ spec:
 
           # If multus CNI is present, this annotation is needed to enable
           # pan-cni CNI plugin for this pod, otherwise no impact.
-          #k8s.v1.cni.cncf.io/networks: pan-cni
+          #k8s.v1.cni.cncf.io/networks: <List of net attachments ex- net-attach-1,net-attach-2,net-attach-3>
     spec:
       priorityClassName: system-cluster-critical
       # Minimize downtime during a rolling upgrade or deletion; Can tell Kubernetes
@@ -51,7 +51,7 @@ spec:
         hostnames:
           - mgmt
       #nodeSelector:  
-      #  firewall: pan-ngfw-ds
+      #  firewall: pan-ngfw-dep-0
       containers:
         - name: pan-ngfw-container
           image: <your-private-registry-image-path>
@@ -82,17 +82,17 @@ spec:
               add: ["ALL"]
           resources:
             requests:
-            #Enable hugepages for DPDK
-            #  hugepages-2Mi: 1Gi
+            # Enable hugepages for DPDK - Refer to the system requirements documentation to see the minimum value needed for different capacity profiles.
+            #  hugepages-2Mi: 4Gi
               # configurable based on desired throughput, number of running pods
               cpu: "1"
               memory: "4Gi"
             limits:
-            #  hugepages-2Mi: 1Gi
+            #  hugepages-2Mi: 4Gi
               cpu: "1"
               memory: "4Gi"
           volumeMounts:
-          #Enable hugepages for DPDK
+          # Enable hugepages for DPDK.
           #- mountPath: /hugepages
           #  name: hugepage
           - mountPath: /sys
