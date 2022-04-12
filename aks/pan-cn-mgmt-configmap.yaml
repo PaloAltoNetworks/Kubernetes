@@ -38,4 +38,4 @@ data:
   
   # Enable high feature capacities. These need high memory for MGMT pod and
   # higher/matching memory than specified below for NGFW pod.
-  #PAN_NGFW_MEMORY="40Gi"
+  #PAN_NGFW_MEMORY: "40Gi"
