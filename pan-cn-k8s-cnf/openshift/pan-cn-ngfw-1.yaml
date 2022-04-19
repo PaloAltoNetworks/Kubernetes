@@ -52,6 +52,23 @@ spec:
           - mgmt
       #nodeSelector:  
       #  firewall: pan-ngfw-dep-1
+      # Turn on podAntiAffinity to schedule HA pair NGFW pods on separate nodes
+      # Turn off podAntiAffinity, if you have nodeSelector setup
+      affinity:
+       podAntiAffinity:
+         requiredDuringSchedulingIgnoredDuringExecution:
+           - labelSelector:
+               matchExpressions:
+                 - key: app
+                   operator: In
+                   values:
+                   - pan-ngfw
+               matchExpressions:
+                 - key: "appname"
+                   operator: In
+                   values:
+                   - pan-mgmt-sts-0
+             topologyKey: "kubernetes.io/hostname"
       containers:
         - name: pan-ngfw-container
           image: <your-private-registry-image-path>

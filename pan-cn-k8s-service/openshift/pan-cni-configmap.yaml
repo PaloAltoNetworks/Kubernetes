@@ -24,6 +24,7 @@ data:
   #        "mode": "daemonset" - normal operation mode
   #                "teardown" - run in tearing down mode. As pan-cn-ngfw pod exits
   #                             or starts, it will cleanup all info.
+  #        "cloudcni": "openshiftsdn" - if CNI is openshift-sdn, for other CNI keep it empty
   #        "maxpod_failover": "failopen" - when max pods are being served, bypass
   #                                        firewall for the new pods. Defaults to
   #                                        wait/block on free spot.
@@ -43,6 +44,7 @@ data:
           "log_level": "debug",
           "appinfo_dir": "/var/log/pan-appinfo",
           "mode": "service",
+          "cloudcni": "openshiftsdn",
           "dpservicename": "pan-ngfw-svc",
           "dpservicenamespace": "kube-system",
           "firewall": [ "pan-fw" ],
