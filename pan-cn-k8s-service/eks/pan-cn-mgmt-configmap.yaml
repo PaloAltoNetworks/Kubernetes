@@ -42,3 +42,6 @@ data:
   #PAN_CLOUD: "EKS"
   #PAN_NAMESPACE_EKS: "Unique Namespace" #unique name to identify hpa resource  per namespace or per tenant
   #PUSH_INTERVAL: "15" #time interval to publish metrics to AWS cloudwatch
+
+  #Certificate signing
+  PAN_CSR_SIGNER_NAME: "beta.eks.amazonaws.com/app-serving"

@@ -37,3 +37,6 @@ data:
   #PAN_NGFW_MEMORY: "6.5Gi"
   #PAN_NGFW_MEMORY: "48Gi"
   #PAN_NGFW_MEMORY: "56Gi"
+
+  #Certificate signing
+  PAN_CSR_SIGNER_NAME: "beta.eks.amazonaws.com/app-serving"
