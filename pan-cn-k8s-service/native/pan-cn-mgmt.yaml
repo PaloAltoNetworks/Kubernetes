@@ -119,8 +119,9 @@ spec:
           resources:
             requests:
               # configurable based on desired logging, capacities
+              # refer to recommended system requirements for CPU & memory from Deployment guide
               cpu: "2"
-              memory: "2.0Gi"
+              memory: "3.0Gi"
             limits:
               cpu: "4"
               memory: "4.0Gi"
