@@ -1,0 +1,57 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: pan-cn-scaled-obj
+spec:
+  scaleTargetRef:
+    apiVersion:    apps/v1  # Optional. Default: apps/v1
+    kind:          Deployment         # Optional. Default: Deployment
+    name:          pan-ngfw-dep         # Mandatory. Must be in the same namespace as the ScaledObject
+  pollingInterval:  30                               # Optional. Default: 30 seconds
+  cooldownPeriod:   300                              # Optional. Default: 300 seconds
+  #idleReplicaCount: 1                               # Optional. Default: ignored, must be less than minReplicaCount
+  minReplicaCount:  2                                # Optional. Default: 0
+  maxReplicaCount:  12                               # Optional. Default: 100
+  fallback:                                          # Optional. Section to specify fallback options
+    failureThreshold: 3                              # Mandatory if fallback section is included
+    replicas: 2                                      # Mandatory if fallback section is included; recommended value: same as minReplicaCount
+  advanced:                                          # Optional. Section to specify advanced options
+    restoreToOriginalReplicaCount: false             # Optional. Default: false
+    horizontalPodAutoscalerConfig:                   # Optional. Section to specify HPA related options
+      behavior:                                      # Optional. Use to modify HPA's scaling behavior
+        scaleDown:
+          stabilizationWindowSeconds: 60
+          policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 15
+  triggers:
+  - type: aws-cloudwatch
+    metadata:
+      # Required: custom eks namespace; should match the PAN_NAMESPACE_EKS in pan-cn-mgmt-configmap.yaml 
+      namespace: test_cluster_dimensions
+      # Required: Dimension Name
+      dimensionName: "Servicename"
+      # Required: Dimension Value
+      dimensionValue: "pan-mgmt-svc"
+      # Optional: Expression query
+      #expression: SELECT MAX("ApproximateNumberOfMessagesVisible") FROM "AWS/SQS" WHERE QueueName = 'keda'
+      # Metric name 
+      metricName: "panconnectionspersecond"
+      targetMetricValue: "20"
+      minMetricValue: "0"
+      # Required: region
+      awsRegion: "us-east-2"
+      # Required: Ensure IAM role is annotated in keda-operator serviceaccount
+      identityOwner: operator # Optional. Default: pod
+      # Optional: Collection Time [StartTime]
+      metricCollectionTime: "180" # default 300
+      # Optional: Metric Statistic
+      #metricStat: "Average" # default "Average"
+      metricType: Value
+      # Optional: Metric Statistic Period [Period]
+      metricStatPeriod: "60" # default 300
+      # Optional: Metric Unit
+      metricUnit: "Count" # default ""
+      # Optional: Metric EndTime Offset
+      metricEndTimeOffset: "0" # default 0

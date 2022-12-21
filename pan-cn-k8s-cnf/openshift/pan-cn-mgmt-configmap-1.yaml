@@ -7,6 +7,9 @@ data:
   PAN_SERVICE_NAME: pan-mgmt-svc-1
   PAN_MGMT_SECRET: pan-mgmt-secret
   #PAN_HA_SUPPORT: "true"
+  # Set device-priority. Lower priority becomes active
+  # Attach the secondary IPs to the lower priority NGFW pod's node's HA ENI
+  #PAN_HA_PRIORITY: "100"
 
   # Panorama settings
   PAN_PANORAMA_IP: "<panorama-IP>"
@@ -32,11 +35,19 @@ data:
   # Start MGMT pod with GTP enabled. For complete functionality, need GTP 
   # enable at Panorama as well.
   #PAN_GTP_ENABLED: "true"
+
+  # Enable the advanced routing (FRR)
+  #PAN_ADVANCED_ROUTING: "true"
   
+  # Start MGMT pod with SCTP enabled. For complete functionality, need SCTP
+  # enable at Panorama as well.
+  #PAN_SCTP_ENABLED: "true"
+
   # Enable high feature capacities. These need high memory for MGMT pod and
   # higher/matching memory than specified below for NGFW pod.
   # Refer to the system requirements documentation to see the max supported NGFW CPU size
   # supported for each memory profile.
+  PAN_NGFW_MEMORY: "4Gi"
   #PAN_NGFW_MEMORY: "6.5Gi"
   #PAN_NGFW_MEMORY: "48Gi"
   #PAN_NGFW_MEMORY: "56Gi"

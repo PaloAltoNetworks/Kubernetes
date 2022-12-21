@@ -1,0 +1,9 @@
+apiVersion: "paloaltonetworks.com/v1"
+kind: "PanLeaderCR"
+metadata:
+  name: "pan-mgmt-svc-leader-cr" # Name should match the MP service - "mpservicename-leader-cr"
+  namespace: kube-system
+spec:
+  leader-pod: ""
+  leader-info: ""
+

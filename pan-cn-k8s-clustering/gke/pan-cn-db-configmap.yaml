@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pan-db-config
+  namespace: kube-system
+data:
+  PAN_VARIANT_TYPE: "NFT"
+  PAN_SERVICE_NAME: pan-mgmt-svc    # should match the pan-cn-mgmt.yaml's Service name
+  FAILOVER_MODE: failclose            # licensing failure behavior
+  DP_RINGBUFFER: "60000"            # buffer count for memory/performance control
+  PAN_CTNR_MODE_TYPE: "k8s-cnf"
+  PAN_CTNR_SUBMODE_TYPE: "cnf-clustering"
+  PAN_DATA_MODE: "mmap"            # HUGEPAGE_MEMORY_REQUEST is also needed
+  HUGEPAGE_MEMORY_REQUEST: "0"  # in MB - needed for DPDK mode - should be same as hugepage request in pan-cn-db.yaml - might change after 1.20
+
+  
+  # Comment out to use CERTs otherwise PSK for IPSec between pan-mgmt and pan-ngfw
+  #IPSEC_CERT_BYPASS: ""            # No values needed
+  
+  IPSEC_NAT_PORT_RANGE: "4500-4510"    # port range to avoid stale connections
+
+  # Enable/Disable cpu pinning of the forwarding processes (default physical
+  # cpus) (different from K8S cpu pinning of the pods)
+  PAN_CPU_PINNING_ENABLED: "false"
+
+  # When doing cpu pinning of forwarding processes, use single NUMA node
+  #PAN_NUMA_ENABLED: "<numa node number>"
+
+  # When doing cpu pinning of forwarding processes, use logical cpus as well
+  #PAN_HYPERTHREADING_ENABLED: "true"
+      
+  # When doing cpu pinning of forwarding processes, skip the lower numbered cpus
+  # and start from this cpu
+  #PAN_CPU_PINNING_BASE: "1"

@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pan-mgmt-config
+  namespace: kube-system
+data:
+  PAN_SERVICE_NAME: pan-mgmt-svc
+  PAN_MGMT_SECRET: pan-mgmt-secret
+
+  # Panorama settings
+  PAN_PANORAMA_IP: "<panorama-IP>"
+  PAN_DEVICE_GROUP: "<panorama-device-group>"
+  PAN_TEMPLATE_STACK: "<panorama-template-stack>"
+  PAN_CGNAME: "<panorama-collector-group>"
+  PAN_CTNR_MODE_TYPE: "k8s-cnf"
+  PAN_CTNR_SUBMODE_TYPE: "cnf-clustering"
+  # Recommended to have same name as the cluster name provided in Panorama Kubernetes plugin - helps with easier identification of pods if managing multiple clusters with same Panorama
+  # Mandatory in clustering sub-mode
+  CLUSTER_NAME: "<cluster-name>"
+
+
+  # Non-mandatory parameters
+  PAN_PANORAMA_IP2: ""
+
+  # Comment out to use CERTs otherwise PSK for IPSec between pan-mgmt and pan-ngfw
+  #IPSEC_CERT_BYPASS: ""         # No values needed
+  
+  # Override auto-detect of jumbo-frame mode and force enable system-wide
+  PAN_JUMBO_FRAME_ENABLED: "false"
+  
+  # Start MGMT pod with GTP enabled. For complete functionality, need GTP 
+  # enable at Panorama as well.
+  PAN_GTP_ENABLED: "false"
+
+  # Default routing mode is FRR
+
+  # Start MGMT pod with SCTP enabled. For complete functionality, need SCTP
+  # enable at Panorama as well.
+  #PAN_SCTP_ENABLED: "true"
+  
+  # Enable high feature capacities. These need high memory for MGMT pod and
+  # higher/matching memory than specified below for NGFW pod.
+  # Refer to the system requirements documentation to see the max supported NGFW CPU size
+  # supported for each memory profile.
+  PAN_NGFW_MEMORY: "4Gi"
+  #PAN_NGFW_MEMORY: "6.5Gi"
+  #PAN_NGFW_MEMORY: "48Gi"
+  #PAN_NGFW_MEMORY: "56Gi"
+
+  #Certificate signing
+  PAN_CSR_SIGNER_NAME: "beta.eks.amazonaws.com/app-serving"
+
+  #HPA params
+  PAN_CLOUD: "EKS"
+  PAN_NAMESPACE_EKS: "" # unique name to identify hpa resource  per namespace or per tenant
+                        # Update the name in HPA/hpa-scaled-obj.yaml with suffix '_dimensions'
+  PUSH_INTERVAL: "60"   # time interval(secs) to publish metrics to AWS cloudwatch

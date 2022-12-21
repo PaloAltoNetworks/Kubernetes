@@ -34,6 +34,7 @@ data:
   # higher/matching memory than specified below for NGFW pod.
   # Refer to the system requirements documentation to see the max supported NGFW CPU size
   # supported for each memory profile.
+  PAN_NGFW_MEMORY: "2Gi"
   #PAN_NGFW_MEMORY: "6.5Gi"
   #PAN_NGFW_MEMORY: "48Gi"
   #PAN_NGFW_MEMORY: "56Gi"

@@ -1,0 +1,27 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: panclusterconfigs.paloaltonetworks.com
+spec:
+  group: paloaltonetworks.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          required: ["spec"]
+          type: object
+          properties:
+            spec:
+              required: ["clustermemberinfo"]
+              type: object
+              properties:
+                clustermemberinfo:
+                  type: string
+                  minimum: 1
+  scope: Namespaced
+  names:
+    plural: panclusterconfigs
+    singular: panclusterconfig
+    kind: PanClusterConfig
