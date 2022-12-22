@@ -35,7 +35,6 @@ spec:
         appname: pan-mgmt-sts
       annotations:
           paloaltonetworks.com/app: pan-mgmt
-          kubectl.kubernetes.io/default-container: pan-mgmt
     spec:
       serviceAccountName: pan-mgmt-sa
       priorityClassName: system-node-critical
