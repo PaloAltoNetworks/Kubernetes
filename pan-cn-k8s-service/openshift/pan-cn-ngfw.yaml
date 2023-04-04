@@ -54,6 +54,19 @@ spec:
           - mgmt
       #nodeSelector:  
       #  firewall: pan-ngfw-ds
+      # Turn on podAntiAffinity to prefer scheduling NGFW pods on separate nodes
+      affinity:
+       podAntiAffinity:
+         preferredDuringSchedulingIgnoredDuringExecution:
+         - weight: 100
+           podAffinityTerm:
+             labelSelector:
+               matchExpressions:
+                 - key: app
+                   operator: In
+                   values:
+                   - pan-ngfw
+             topologyKey: "kubernetes.io/hostname"
       containers:
         - name: pan-ngfw-container
           image: <your-private-registry-image-path>
@@ -76,7 +89,7 @@ spec:
             periodSeconds: 5
             # liveness is still the indicator of the container's health.
             failureThreshold: 2
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           securityContext:
             capabilities:
               add: ["ALL"]

@@ -33,8 +33,8 @@ spec:
           #paloaltonetworks.com/firewall: pan-fw
 
           # Below annotation is always fixed and is used to detect this Deployment.
-          #     paloaltonetworks.com/app: pan-fw
-        paloaltonetworks.com/app: pan-fw
+          #     paloaltonetworks.com/app: pan-db
+        paloaltonetworks.com/app: pan-db
 
           # If multus CNI is present, this annotation is needed to enable
           # pan-cni CNI plugin for this pod, otherwise no impact.
@@ -84,11 +84,11 @@ spec:
           livenessProbe:
             exec:
               command: ["/sbin/pan_alive_check"]
-            initialDelaySeconds: 600 #covers image download and panos start
+            initialDelaySeconds: 900 #covers image download, panos start and cluster ready
             periodSeconds: 5
             # liveness is still the indicator of the container's health.
             failureThreshold: 2
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
             capabilities:
@@ -166,6 +166,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+      imagePullSecrets:
+      - name: " "
       volumes:
       #Enable hugepages for DPDK
       - name: hugepage

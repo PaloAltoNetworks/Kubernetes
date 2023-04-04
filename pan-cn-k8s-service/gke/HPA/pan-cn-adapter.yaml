@@ -37,13 +37,31 @@ subjects:
   namespace: custom-metrics
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: custom-metrics-resource-reader
+  namespace: custom-metrics
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - nodes
+  - nodes/stats
+  verbs:
+  - get
+  - list
+  - watch
+---
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: custom-metrics-resource-reader
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: view
+  name: custom-metrics-resource-reader
 subjects:
 - kind: ServiceAccount
   name: custom-metrics-stackdriver-adapter
@@ -72,12 +90,12 @@ spec:
     spec:
       serviceAccountName: custom-metrics-stackdriver-adapter
       containers:
-      - image: gcr.io/google-containers/custom-metrics-stackdriver-adapter:v0.10.2
-        imagePullPolicy: Always
+      - image: gcr.io/gke-release/custom-metrics-stackdriver-adapter:v0.13.1-gke.0
+        imagePullPolicy: IfNotPresent
         name: pod-custom-metrics-stackdriver-adapter
         command:
         - /adapter
-        - --use-new-resource-model=false
+        - --use-new-resource-model=true
         resources:
           limits:
             cpu: 250m

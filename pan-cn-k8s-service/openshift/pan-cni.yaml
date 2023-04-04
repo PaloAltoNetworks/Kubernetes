@@ -58,7 +58,7 @@ spec:
         # and CNI network config file on each node.
         - name: install-pan-cni
           image: <your-private-registry-image-path>
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: ["/install-pan-cni.sh", "main"]
           lifecycle:
             # Before killing the container, executes the below handler

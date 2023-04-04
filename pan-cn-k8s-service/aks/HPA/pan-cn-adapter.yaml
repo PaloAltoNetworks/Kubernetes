@@ -287,7 +287,7 @@ spec:
       containers:
         - name: azure-k8s-metrics-adapter
           image: "mcr.microsoft.com/k8s/metrics/adapter:latest"
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           args:
             - /adapter
             - --secure-port=6443

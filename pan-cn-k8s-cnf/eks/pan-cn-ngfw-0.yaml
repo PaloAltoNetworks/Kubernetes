@@ -92,7 +92,7 @@ spec:
             periodSeconds: 5
             # liveness is still the indicator of the container's health.
             failureThreshold: 2
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
             capabilities:

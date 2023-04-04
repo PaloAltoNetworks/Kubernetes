@@ -1,0 +1,246 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: pan-cn-scaled-obj
+spec:
+  scaleTargetRef:
+    apiVersion:    apps/v1                           # Optional. Default: apps/v1
+    kind:          Deployment                        # Optional. Default: Deployment
+    name:          pan-ngfw-dep                      # Mandatory. Must be in the same namespace as the ScaledObject
+  pollingInterval:  30                               # Optional. Default: 30 seconds
+  cooldownPeriod:   300                              # Optional. Default: 300 seconds
+  minReplicaCount:  2
+  maxReplicaCount:  30
+  fallback:                                          # Optional. Section to specify fallback options
+    failureThreshold: 3                              # Mandatory if fallback section is included
+    replicas: 2                                      # Mandatory if fallback section is included; recommended value: same as minReplicaCount
+  advanced:                                          # Optional. Section to specify advanced options
+    restoreToOriginalReplicaCount: false             # Optional. Default: false. On HPA termination, restore to original count
+    horizontalPodAutoscalerConfig:                   # Optional. Section to specify HPA related options
+      behavior:                                      # Optional. Use to modify HPA's scaling behavior
+        scaleDown:
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 60
+          - type: Percent
+            value: 1
+            periodSeconds: 60
+          stabilizationWindowSeconds: 300
+        scaleUp:
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 120                       # assuming 2 mins for dp to be ready
+          - type: Percent
+            value: 1
+            periodSeconds: 120                       # assuming 2 mins for dp to be ready
+          stabilizationWindowSeconds: 60
+  triggers:
+  - type: aws-cloudwatch
+    metricType: "Value"
+    metadata:
+      # Required: custom eks namespace = PAN_NAMESPACE_EKS in pan-cn-mgmt-configmap.yaml + '_dimensions'
+      namespace: <PAN_NAMESPACE_EKS_dimensions> 
+      # Required: Dimension Name
+      dimensionName: "Servicename"
+      # Required: Dimension Value
+      dimensionValue: "pan-mgmt-svc"
+      # Metric name 
+      metricName: "dataplanecpuutilizationpct"
+      targetMetricValue: "20"
+      minMetricValue: "0"
+      # Required: region
+      awsRegion: "us-east-2"
+      # Required: Ensure IAM role is annotated in keda-operator serviceaccount
+      identityOwner: operator #Default: pod. Receive permissions for CloudWatch via Pod Identity or from the KEDA operator. 
+      # Optional: Collection Time [StartTime]
+      metricCollectionTime: "180" # default 300
+      # Optional: Metric Statistic Period [Period]
+      metricStatPeriod: "60" # default 300
+      # Optional: Metric Unit
+      metricUnit: "Count" # default ""
+      # Optional: Metric EndTime Offset
+      metricEndTimeOffset: "0" # default 0
+#  triggers:
+#  - type: aws-cloudwatch
+#    metricType: "Value"
+#    metadata:
+#      # Required: custom eks namespace = PAN_NAMESPACE_EKS in pan-cn-mgmt-configmap.yaml + '_dimensions'
+#      namespace: <PAN_NAMESPACE_EKS_dimensions> 
+#      # Required: Dimension Name
+#      dimensionName: "Servicename"
+#      # Required: Dimension Value
+#      dimensionValue: "pan-mgmt-svc"
+#      # Metric name 
+#      metricName: "dataplanepacketbufferutilization"
+#      targetMetricValue: "20"
+#      minMetricValue: "0"
+#      # Required: region
+#      awsRegion: "us-east-2"
+#      # Required: Ensure IAM role is annotated in keda-operator serviceaccount
+#      identityOwner: operator #Default: pod. Receive permissions for CloudWatch via Pod Identity or from the KEDA operator. 
+#      # Optional: Collection Time [StartTime]
+#      metricCollectionTime: "180" # default 300
+#      # Optional: Metric Statistic Period [Period]
+#      metricStatPeriod: "60" # default 300
+#      # Optional: Metric Unit
+#      metricUnit: "Count" # default ""
+#      # Optional: Metric EndTime Offset
+#      metricEndTimeOffset: "0" # default 0
+#    triggers:
+#  - type: aws-cloudwatch
+#    metricType: "Value"
+#    metadata:
+#      # Required: custom eks namespace = PAN_NAMESPACE_EKS in pan-cn-mgmt-configmap.yaml + '_dimensions'
+#      namespace: <PAN_NAMESPACE_EKS_dimensions> 
+#      # Required: Dimension Name
+#      dimensionName: "Servicename"
+#      # Required: Dimension Value
+#      dimensionValue: "pan-mgmt-svc"
+#      # Metric name 
+#      metricName: "pansessionactive"
+#      targetMetricValue: "20"
+#      minMetricValue: "0"
+#      # Required: region
+#      awsRegion: "us-east-2"
+#      # Required: Ensure IAM role is annotated in keda-operator serviceaccount
+#      identityOwner: operator #Default: pod. Receive permissions for CloudWatch via Pod Identity or from the KEDA operator. 
+#      # Optional: Collection Time [StartTime]
+#      metricCollectionTime: "180" # default 300
+#      # Optional: Metric Statistic Period [Period]
+#      metricStatPeriod: "60" # default 300
+#      # Optional: Metric Unit
+#      metricUnit: "Count" # default ""
+#      # Optional: Metric EndTime Offset
+#      metricEndTimeOffset: "0" # default 0
+#  triggers:
+#  - type: aws-cloudwatch
+#    metricType: "Value"
+#    metadata:
+#      # Required: custom eks namespace = PAN_NAMESPACE_EKS in pan-cn-mgmt-configmap.yaml + '_dimensions'
+#      namespace: <PAN_NAMESPACE_EKS_dimensions> 
+#      # Required: Dimension Name
+#      dimensionName: "Servicename"
+#      # Required: Dimension Value
+#      dimensionValue: "pan-mgmt-svc"
+#      # Metric name 
+#      metricName: "pansessionutilization"
+#      targetMetricValue: "20"
+#      minMetricValue: "0"
+#      # Required: region
+#      awsRegion: "us-east-2"
+#      # Required: Ensure IAM role is annotated in keda-operator serviceaccount
+#      identityOwner: operator #Default: pod. Receive permissions for CloudWatch via Pod Identity or from the KEDA operator. 
+#      # Optional: Collection Time [StartTime]
+#      metricCollectionTime: "180" # default 300
+#      # Optional: Metric Statistic Period [Period]
+#      metricStatPeriod: "60" # default 300
+#      # Optional: Metric Unit
+#      metricUnit: "Count" # default ""
+#      # Optional: Metric EndTime Offset
+#      metricEndTimeOffset: "0" # default 0
+#  triggers:
+#  - type: aws-cloudwatch
+#    metricType: "Value"
+#    metadata:
+#      # Required: custom eks namespace = PAN_NAMESPACE_EKS in pan-cn-mgmt-configmap.yaml + '_dimensions'
+#      namespace: <PAN_NAMESPACE_EKS_dimensions> 
+#      # Required: Dimension Name
+#      dimensionName: "Servicename"
+#      # Required: Dimension Value
+#      dimensionValue: "pan-mgmt-svc"
+#      # Metric name 
+#      metricName: "pansessionsslproxyutilization"
+#      targetMetricValue: "20"
+#      minMetricValue: "0"
+#      # Required: region
+#      awsRegion: "us-east-2"
+#      # Required: Ensure IAM role is annotated in keda-operator serviceaccount
+#      identityOwner: operator #Default: pod. Receive permissions for CloudWatch via Pod Identity or from the KEDA operator. 
+#      # Optional: Collection Time [StartTime]
+#      metricCollectionTime: "180" # default 300
+#      # Optional: Metric Statistic Period [Period]
+#      metricStatPeriod: "60" # default 300
+#      # Optional: Metric Unit
+#      metricUnit: "Count" # default ""
+#      # Optional: Metric EndTime Offset
+#      metricEndTimeOffset: "0" # default 0
+#  triggers:
+#  - type: aws-cloudwatch
+#    metricType: "Value"
+#    metadata:
+#      # Required: custom eks namespace = PAN_NAMESPACE_EKS in pan-cn-mgmt-configmap.yaml + '_dimensions'
+#      namespace: <PAN_NAMESPACE_EKS_dimensions> 
+#      # Required: Dimension Name
+#      dimensionName: "Servicename"
+#      # Required: Dimension Value
+#      dimensionValue: "pan-mgmt-svc"
+#      # Metric name 
+#      metricName: "panthroughput"
+#      targetMetricValue: "20"
+#      minMetricValue: "0"
+#      # Required: region
+#      awsRegion: "us-east-2"
+#      # Required: Ensure IAM role is annotated in keda-operator serviceaccount
+#      identityOwner: operator #Default: pod. Receive permissions for CloudWatch via Pod Identity or from the KEDA operator. 
+#      # Optional: Collection Time [StartTime]
+#      metricCollectionTime: "180" # default 300
+#      # Optional: Metric Statistic Period [Period]
+#      metricStatPeriod: "60" # default 300
+#      # Optional: Metric Unit
+#      metricUnit: "Count" # default ""
+#      # Optional: Metric EndTime Offset
+#      metricEndTimeOffset: "0" # default 0
+#  triggers:
+#  - type: aws-cloudwatch
+#    metricType: "Value"
+#    metadata:
+#      # Required: custom eks namespace = PAN_NAMESPACE_EKS in pan-cn-mgmt-configmap.yaml + '_dimensions'
+#      namespace: <PAN_NAMESPACE_EKS_dimensions> 
+#      # Required: Dimension Name
+#      dimensionName: "Servicename"
+#      # Required: Dimension Value
+#      dimensionValue: "pan-mgmt-svc"
+#      # Metric name 
+#      metricName: "panpacketrate"
+#      targetMetricValue: "20"
+#      minMetricValue: "0"
+#      # Required: region
+#      awsRegion: "us-east-2"
+#      # Required: Ensure IAM role is annotated in keda-operator serviceaccount
+#      identityOwner: operator #Default: pod. Receive permissions for CloudWatch via Pod Identity or from the KEDA operator. 
+#      # Optional: Collection Time [StartTime]
+#      metricCollectionTime: "180" # default 300
+#      # Optional: Metric Statistic Period [Period]
+#      metricStatPeriod: "60" # default 300
+#      # Optional: Metric Unit
+#      metricUnit: "Count" # default ""
+#      # Optional: Metric EndTime Offset
+#      metricEndTimeOffset: "0" # default 0
+#  triggers:
+#  - type: aws-cloudwatch
+#    metricType: "Value"
+#    metadata:
+#      # Required: custom eks namespace = PAN_NAMESPACE_EKS in pan-cn-mgmt-configmap.yaml + '_dimensions'
+#      namespace: <PAN_NAMESPACE_EKS_dimensions> 
+#      # Required: Dimension Name
+#      dimensionName: "Servicename"
+#      # Required: Dimension Value
+#      dimensionValue: "pan-mgmt-svc"
+#      # Metric name 
+#      metricName: "panconnectionspersecond"
+#      targetMetricValue: "20"
+#      minMetricValue: "0"
+#      # Required: region
+#      awsRegion: "us-east-2"
+#      # Required: Ensure IAM role is annotated in keda-operator serviceaccount
+#      identityOwner: operator #Default: pod. Receive permissions for CloudWatch via Pod Identity or from the KEDA operator. 
+#      # Optional: Collection Time [StartTime]
+#      metricCollectionTime: "180" # default 300
+#      # Optional: Metric Statistic Period [Period]
+#      metricStatPeriod: "60" # default 300
+#      # Optional: Metric Unit
+#      metricUnit: "Count" # default ""
+#      # Optional: Metric EndTime Offset
+#      metricEndTimeOffset: "0" # default 0

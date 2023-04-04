@@ -24,11 +24,15 @@ data:
   PAN_CPU_PINNING_ENABLED: "false"
 
   # When doing cpu pinning of forwarding processes, use single NUMA node
-  #PAN_NUMA_ENABLED: "<numa node number>"
+  # options: "-1"- disable
+  #        : "0" -  NUMA 0
+  #        : "1" -  NUMA 1
+  PAN_NUMA_ENABLED: "-1"
 
   # When doing cpu pinning of forwarding processes, use logical cpus as well
-  #PAN_HYPERTHREADING_ENABLED: "true"
+  # Default: "false"
+  PAN_HYPERTHREADING_ENABLED: "false"
       
   # When doing cpu pinning of forwarding processes, skip the lower numbered cpus
   # and start from this cpu
-  #PAN_CPU_PINNING_BASE: "1"
+  PAN_CPU_PINNING_BASE: "1"

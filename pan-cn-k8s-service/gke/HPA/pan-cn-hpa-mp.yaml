@@ -1,6 +1,6 @@
 #Refer to README for more details on HPA
 #substitute  <HPA_NAME> with unique hpa name provided in pan-cn-mgmt-configmap
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: hpa-mp-gke

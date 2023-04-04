@@ -1,0 +1,144 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: azure-app-insights-secrets
+  namespace: kube-system
+type: Opaque
+stringData:
+  activeDirectoryClientId: <clientId>
+  activeDirectoryClientPassword: <clientPassword>
+  applicationInsightsId: <appInsightsAppId>
+  tenantId: <tenantId>
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: azure-app-insights-trigger-auth
+  namespace: kube-system
+spec:
+  secretTargetRef:
+    - parameter: activeDirectoryClientId
+      name: azure-app-insights-secrets
+      key: activeDirectoryClientId
+    - parameter: activeDirectoryClientPassword
+      name: azure-app-insights-secrets
+      key: activeDirectoryClientPassword
+    - parameter: applicationInsightsId
+      name: azure-app-insights-secrets
+      key: applicationInsightsId
+    - parameter: tenantId
+      name: azure-app-insights-secrets
+      key: tenantId
+---
+
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: hpa-dp
+  namespace: kube-system
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pan-ngfw-dep
+  pollingInterval: 5                               # Optional. Default: 30 seconds
+  cooldownPeriod: 5                              # Optional. Default: 300 seconds
+  minReplicaCount: 2
+  maxReplicaCount: 30
+  advanced:                                          # Optional. Section to specify advanced options
+    horizontalPodAutoscalerConfig:                   # Optional. Section to specify HPA related options
+      behavior:                                      # Optional. Use to modify HPA's scaling behavior
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+          - type: Percent
+            value: 1
+            periodSeconds: 60
+          - type: Pods
+            value: 1
+            periodSeconds: 60
+        scaleUp:
+          stabilizationWindowSeconds: 30
+          policies:
+          - type: Pods
+            value: 2
+            periodSeconds: 300 # assuming 5 mins for dp to be ready
+          - type: Percent
+            value: 1
+            periodSeconds: 300 # assuming 5 mins for dp to be ready
+          selectPolicy: Max
+  triggers:
+  - type: azure-app-insights
+    metricType: "Value"
+    metadata:
+      metricAggregationTimespan: "0:1"
+      metricAggregationType: avg
+      metricId: "customMetrics/dataplanecpuutilizationpct"
+      targetValue: "80"
+    authenticationRef:
+      name: azure-app-insights-trigger-auth
+#  - type: azure-app-insights
+#    metricType: "Value"
+#    metadata:
+#      metricAggregationTimespan: "0:1"
+#      metricAggregationType: avg
+#      metricId: "customMetrics/dataplanepacketbufferutilization"
+#      targetValue: "80"
+#    authenticationRef:
+#      name: azure-app-insights-trigger-auth
+#  - type: azure-app-insights
+#    metricType: "Value"
+#    metadata:
+#      metricAggregationTimespan: "0:1"
+#      metricAggregationType: avg
+#      metricId: "customMetrics/pansessionactive"
+#      targetValue: "80"
+#    authenticationRef:
+#      name: azure-app-insights-trigger-auth
+#  - type: azure-app-insights
+#    metricType: "Value"
+#    metadata:
+#      metricAggregationTimespan: "0:1"
+#      metricAggregationType: avg
+#      metricId: "customMetrics/pansessionutilization"
+#      targetValue: "80"
+#    authenticationRef:
+#      name: azure-app-insights-trigger-auth
+#  - type: azure-app-insights
+#    metricType: "Value"
+#    metadata:
+#      metricAggregationTimespan: "0:1"
+#      metricAggregationType: avg
+#      metricId: "customMetrics/pansessionsslproxyutilization"
+#      targetValue: "80"
+#    authenticationRef:
+#      name: azure-app-insights-trigger-auth
+#  - type: azure-app-insights
+#    metricType: "Value"
+#    metadata:
+#      metricAggregationTimespan: "0:1"
+#      metricAggregationType: avg
+#      metricId: "customMetrics/panthroughput"
+#      targetValue: "80"
+#    authenticationRef:
+#      name: azure-app-insights-trigger-auth
+#  - type: azure-app-insights
+#    metricType: "Value"
+#    metadata:
+#      metricAggregationTimespan: "0:1"
+#      metricAggregationType: avg
+#      metricId: "customMetrics/panpacketrate"
+#      targetValue: "80"
+#    authenticationRef:
+#      name: azure-app-insights-trigger-auth
+#  - type: azure-app-insights
+#    metricType: "Value"
+#    metadata:
+#      metricAggregationTimespan: "0:1"
+#      metricAggregationType: avg
+#      metricId: "customMetrics/panconnectionspersecond"
+#      targetValue: "80"
+#    authenticationRef:
+#      name: azure-app-insights-trigger-auth
+#

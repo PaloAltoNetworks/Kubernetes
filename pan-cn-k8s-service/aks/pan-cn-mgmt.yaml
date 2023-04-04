@@ -56,7 +56,7 @@ spec:
         - name: pan-mgmt-init
           image: <your-private-registry-image-path>
           command: ["/usr/bin/pan_start.sh"]
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
             capabilities:
@@ -112,7 +112,7 @@ spec:
             initialDelaySeconds: 600 #covers image download and panos start
             periodSeconds: 5
             failureThreshold: 2
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
             capabilities:
