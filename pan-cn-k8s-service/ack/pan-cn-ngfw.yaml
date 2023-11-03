@@ -4,8 +4,7 @@ metadata:
   name: pan-ngfw-dep
   namespace: kube-system
   labels:
-    app: pan-ngfw
-    product: pan-cn-series
+      app: pan-ngfw
 spec:
   strategy:
     type: RollingUpdate
@@ -14,31 +13,27 @@ spec:
   selector:
     matchLabels:
       app: pan-ngfw
-  #min replicase set to 2     
+  # min replicas set to 2
   replicas: 2
   template:
     metadata:
       labels:
         app: pan-ngfw
-        product: pan-cn-series
       annotations:
-          # net-attach list defines the interface mapping order. 
-          # TI link for LB and C/U pods, CI for all NGFW pod interconnect
-        k8s.v1.cni.cncf.io/networks: net-attach-def-ci-ngfw, net-attach-def-ti-ngfw
           # Application Pods and Namespaces with annotation
           #     paloaltonetworks.com/firewall: pan-fw*
           # will be secured when this daemonset is running with exact same
           # annotation on the node. The value must start with "pan-fw" as prefix
           # This needs to be in the list of "firewall" in pan-cni-configmap.yaml
-          #paloaltonetworks.com/firewall: pan-fw
+          paloaltonetworks.com/firewall: pan-fw
 
           # Below annotation is always fixed and is used to detect this Deployment.
           #     paloaltonetworks.com/app: pan-fw
-        paloaltonetworks.com/app: pan-fw
+          paloaltonetworks.com/app: pan-fw
 
           # If multus CNI is present, this annotation is needed to enable
           # pan-cni CNI plugin for this pod, otherwise no impact.
-          #k8s.v1.cni.cncf.io/networks: pan-cni
+          k8s.v1.cni.cncf.io/networks: pan-cni
     spec:
       priorityClassName: system-cluster-critical
       # Minimize downtime during a rolling upgrade or deletion; Can tell Kubernetes
@@ -52,24 +47,25 @@ spec:
       - ip: "169.254.202.1"
         hostnames:
           - mgmt
-      # all the pods of a deployment need to be on different nodes 
-      nodeSelector:  
-        paloalto-ngfw: networks-ngfw 
+      #nodeSelector:  
+      #  firewall: pan-ngfw-ds
+      # Turn on podAntiAffinity to prefer scheduling NGFW pods on separate nodes
       affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: app
-                    operator: In
-                    values:
-                    - pan-ngfw
-              topologyKey: "kubernetes.io/hostname"
+       podAntiAffinity:
+         preferredDuringSchedulingIgnoredDuringExecution:
+         - weight: 100
+           podAffinityTerm:
+             labelSelector:
+               matchExpressions:
+                 - key: app
+                   operator: In
+                   values:
+                   - pan-ngfw
+             topologyKey: "kubernetes.io/hostname"
       containers:
         - name: pan-ngfw-container
           image: <your-private-registry-image-path>
-          command: ["/sbin/pan_start","newnns","nspan-fw","123456"]
-          #command: ["/usr/bin/sleep","infinity"]
+          command: ["/sbin/pan_start","newnns","nspan-fw","eac8617ee91"]
           lifecycle:
             preStop:
               exec:
@@ -84,40 +80,38 @@ spec:
           livenessProbe:
             exec:
               command: ["/sbin/pan_alive_check"]
-            initialDelaySeconds: 900 #covers image download, panos start and cluster ready
+            initialDelaySeconds: 600 #covers image download and panos start
             periodSeconds: 5
             # liveness is still the indicator of the container's health.
             failureThreshold: 2
           imagePullPolicy: IfNotPresent
           securityContext:
-            privileged: true
             capabilities:
+              #add: ["NET_ADMIN","NET_RAW","NET_BROADCAST","NET_BIND_SERVICE"]
               add: ["ALL"]
           resources:
             requests:
-              # Enable hugepages for DPDK
-              hugepages-2Mi: 0Gi
               # configurable based on desired throughput, number of running pods
               cpu: "1"
               memory: "4Gi"
             limits:
-              hugepages-2Mi: 0Gi
               cpu: "1"
               memory: "4Gi"
           volumeMounts:
-          #Enable hugepages for DPDK
-          - mountPath: /hugepages
-            name: hugepage
-          - mountPath: /sys
-            name: sys
-          - mountPath: /dev
-            name: dev
+          - mountPath: /opt/appinfo
+            name: appinfo
+          - mountPath: /opt/pan-cni-ready
+            name: pan-cni-ready
+          - mountPath: /dev/net/tun
+            name: devnettun
+            readOnly: false
           - mountPath: /dev/shm
             name: dshm
-          - mountPath: /run/tmp
-            name: hosttmp
           - mountPath: /etc/pan-fw-sw
             name: sw-secret
+          # Optional for custom cert
+          - name: pancustomca
+            mountPath: /etc/custom-ca
           envFrom:
           - configMapRef:
               name: pan-ngfw-config
@@ -166,27 +160,32 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-      imagePullSecrets:
-      - name: " "
       volumes:
-      #Enable hugepages for DPDK
-      - name: hugepage
-        emptyDir:
-          medium: HugePages
-      - name: sys
+      - name: devnettun
         hostPath:
-          path: /sys
-      - name: dev
-        hostPath:
-          path: /dev
-      - name: hosttmp
-        hostPath:
-          path: /tmp/pan
+          path: /dev/net/tun
       - name: dshm
         emptyDir:
           medium: Memory
+      - name: appinfo
+        hostPath:
+          # app pod info's directory location on host
+          # below path should match pan-cni's "appinfo" volume and 
+          # "appinfo_dir" configmap and pan-ngfw-ds's part of "pan-cni-ready" volume
+          path: /var/log/pan-appinfo
+          type: Directory
+      - name: pan-cni-ready
+        hostPath:
+          # block pan-ngfw-ds scheduling till PAN CNI plugin insertion on the node
+          path: /var/log/pan-appinfo/pan-cni-ready
+          type: Directory
       - name: sw-secret
         secret:
           # Don't change this. Needs to match PAN_DP_NAME in pan-cn-mgmt.yaml
           # followed by suffix "-sw". Also hard-coded in ipsec.conf
           secretName: pan-fw-sw
+      # Optional for custom cert - Pass custom CA cert as a secret with file name ca.crt
+      - name: pancustomca
+        secret:
+          secretName: custom-ca-secret
+          optional: true

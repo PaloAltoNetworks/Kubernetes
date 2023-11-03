@@ -39,12 +39,8 @@ spec:
           #k8s.v1.cni.cncf.io/networks: <List of net attachments ex- net-attach-1,net-attach-2,net-attach-3>
     spec:
       priorityClassName: system-cluster-critical
-      # Minimize downtime during a rolling upgrade or deletion; Can tell Kubernetes
-      # to do a "force deletion": 
-      # https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
-      # but for now allowing 10 seconds to do graceful removal of the slots by 
-      # sending dereg to PAN-MGMT
-      terminationGracePeriodSeconds: 10
+      # Allow a graceful period for DPDK unbind
+      terminationGracePeriodSeconds: 60
       hostAliases:
       # Internal IP address of ipsec0 interface on MGMT pod
       - ip: "169.254.202.1"
@@ -100,12 +96,12 @@ spec:
           resources:
             requests:
             # Enable hugepages for DPDK - Refer to the system requirements documentation to see the minimum value needed for different capacity profiles.
-            # hugepages-2Mi: 4Gi
+            # hugepages-2Mi: 4098Mi
             # configurable based on desired throughput, number of running pods
               cpu: "1"
               memory: "4Gi"
             limits:
-              #hugepages-2Mi: 4Gi
+              #hugepages-2Mi: 4098Mi
               cpu: "1"
               memory: "4Gi"
           volumeMounts:

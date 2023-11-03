@@ -1,7 +1,16 @@
 apiVersion: "paloaltonetworks.com/v1"
 kind: "PanClusterConfig"
 metadata:
-  name: "pan-mgmt-svc-cluster" # Name should match the MP service - "mpservicename-cluster"
+  name: "<cluster-name>-config" # <cluster-name> should match the CLUSTER_NAME field in pan-cn-mgmt-configmap.yaml
+  namespace: kube-system
+spec:
+  clustermemberinfo : ""
+---
+# For backward compatibility
+apiVersion: "paloaltonetworks.com/v1"
+kind: "PanClusterConfig"
+metadata:
+  name: "pan-mgmt-svc-cluster" # Name should match the MP service - "mpservicename-cluster" 
   namespace: kube-system
 spec:
   clustermemberinfo : ""

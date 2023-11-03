@@ -18,15 +18,13 @@ kind: StatefulSet
 metadata:
   name: pan-mgmt-sts
   namespace: kube-system
-  labels:
-    product: pan-cn-series
 spec:
   selector:
     matchLabels:
       appname: pan-mgmt-sts
   serviceName: pan-mgmt-svc
-  # Max 2 replicas supported.
-  replicas: 1
+  # Replicas are for fault-tolerance. Max 2 replicas supported.
+  replicas: 2
   updateStrategy:
     type: RollingUpdate
   podManagementPolicy: Parallel
@@ -35,28 +33,25 @@ spec:
       labels:
         app: pan-mgmt
         appname: pan-mgmt-sts
-        product: pan-cn-series
       annotations:
           paloaltonetworks.com/app: pan-mgmt
           kubectl.kubernetes.io/default-container: pan-mgmt
     spec:
       serviceAccountName: pan-mgmt-sa
       priorityClassName: system-node-critical
-      #terminationGracePeriodSeconds: 60 //for graceful exit of prestop hook
+      #terminationGracePeriodSeconds: 60 #for graceful exit of prestop hook
       # Turn on podAntiAffinity to schedule replicas on separate nodes
       # Turn off podAntiAffinity to allow scheduling of both replicas on a single node
-      nodeSelector:
-        paloalto-mgmt: networks-mgmt  
       affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: "appname"
-                    operator: In
-                    values:
-                    - pan-mgmt-sts
-              topologyKey: "kubernetes.io/hostname"
+       podAntiAffinity:
+         requiredDuringSchedulingIgnoredDuringExecution:
+           - labelSelector:
+               matchExpressions:
+                 - key: "appname"
+                   operator: In
+                   values:
+                   - pan-mgmt-sts
+             topologyKey: "kubernetes.io/hostname"
       initContainers:
         - name: pan-mgmt-init
           image: <your-private-registry-image-path>
@@ -92,7 +87,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.uid
           - name: PAN_DP_NAME
-            # Needs to match the prefix in secret volume
+            # Don't change this. Needs to match the prefix in secret volume
             # sw-secret in pan-cn-ngfw.yaml and hard-coded in ipsec.conf
             value: pan-fw
       containers:
@@ -148,9 +143,16 @@ spec:
             mountPath: /opt/plugins/opt/pancfg/mgmt/plugins/
           - mountPath: /dev/shm
             name: dshm
+          # Optional for custom cert
+          - name: pancustomca
+            mountPath: /etc/custom-ca
           envFrom:
           - configMapRef:
               name: pan-mgmt-config
+          # Uncomment the below 3 lines to enable HPA
+          #envFrom:
+          #- configMapRef:
+          #    name: pan-hpa-config
           env:
           - name: MY_POD_UID
             valueFrom:
@@ -177,57 +179,67 @@ spec:
               fieldRef:
                 fieldPath: spec.nodeName
           - name: PAN_DP_NAME
-            # Needs to match the prefix in secret volume
+            # Don't change this. Needs to match the prefix in secret volume
             # sw-secret in pan-cn-ngfw.yaml and hard-coded in ipsec.conf
             value: pan-fw
-      imagePullSecrets:
-      - name: " "
+ 
       volumes:
       - name: dshm
         emptyDir:
           medium: Memory
+      # Optional for custom cert - Pass custom CA cert as a secret with file name ca.crt
+      - name: pancustomca
+        secret:
+          secretName: custom-ca-secret
+          optional: true
   volumeClaimTemplates:
   - metadata:
       name: panlogs
     spec:
-      #storageClassName: pan-cn-storage-class //For better disk iops performance for logging
+      storageClassName: alicloud-disk-available
+      #storageClassName: alicloud-disk-essd   #For better disk iops performance for logging
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 20Gi # change this to 200Gi while using storageClassName for better disk iops
+          storage: 20Gi #Change this to 200Gi for even better iops with essd
   - metadata:
       name: varlogpan
     spec:
-      #storageClassName: pan-cn-storage-class //For better disk iops performance for dp logs
+      storageClassName: alicloud-disk-available
+      #storageClassName: alicloud-disk-essd   #For better disk iops performance for process log
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 20Gi # change this to 200Gi while using storageClassName for better disk iops
+          storage: 20Gi #Change this to 200Gi for even better iops with essd
   - metadata:
       name: varcores
     spec:
+      storageClassName: alicloud-disk-available
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 2Gi
+          storage: 20Gi #20Gi is the minimum disk size in ACK
   - metadata:
       name: panplugincfg
     spec:
+      storageClassName: alicloud-disk-available
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 1Gi
+          storage: 20Gi #20Gi is the minimum disk size in ACK
   - metadata:
       name: panconfig
     spec:
+      storageClassName: alicloud-disk-available
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 8Gi
+          storage: 20Gi #20Gi is the minimum disk size in ACK
   - metadata:
       name: panplugins
     spec:
+      storageClassName: alicloud-disk-available
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 200Mi
+          storage: 20Gi #20Gi is the minimum disk size in ACK

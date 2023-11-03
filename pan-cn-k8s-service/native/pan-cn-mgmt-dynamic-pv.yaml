@@ -229,11 +229,11 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 8Gi
+          storage: 16Gi
   - metadata:
       name: panplugins
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 200Mi
+          storage: 1Gi

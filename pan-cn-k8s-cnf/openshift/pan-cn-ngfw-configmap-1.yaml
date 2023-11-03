@@ -9,7 +9,8 @@ data:
   DP_RINGBUFFER: "60000"            # buffer count for memory/performance control
   PAN_CTNR_MODE_TYPE: "k8s-cnf"
   #PAN_DATA_MODE: "dpdk"            # HUGEPAGE_MEMORY_REQUEST is also needed
-  #HUGEPAGE_MEMORY_REQUEST: "1024"  # in MB - needed for DPDK mode - should be same as hugepage request in pan-cn-ngfw.yaml - might change after 1.20
+  #HUGEPAGE_MEMORY_REQUEST: "1026"  # in MB - needed for DPDK mode - should be same as hugepage request in pan-cn-ngfw.yaml - might change after 1.20
+                                    # Need extra 2MB of DPDK memory to account for 1 extra hugepage in NUMA node 1
   #PAN_HA_SUPPORT: "true"
 
   

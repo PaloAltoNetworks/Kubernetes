@@ -1,9 +1,9 @@
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
+apiVersion: "apiextensions.k8s.io/v1"
+kind: "CustomResourceDefinition"
 metadata:
-  name: panclusterconfigs.paloaltonetworks.com
+  name: "portinfos.paloaltonetworks.com"
 spec:
-  group: paloaltonetworks.com
+  group: "paloaltonetworks.com"
   versions:
     - name: v1
       served: true
@@ -14,14 +14,14 @@ spec:
           type: object
           properties:
             spec:
-              required: ["clustermemberinfo"]
+              required: ["portinfo"]
               type: object
               properties:
-                clustermemberinfo:
+                portinfo:
                   type: string
                   minimum: 1
-  scope: Namespaced
+  scope: "Namespaced"
   names:
-    plural: panclusterconfigs
-    singular: panclusterconfig
-    kind: PanClusterConfig
+    plural: "portinfos"
+    singular: "portinfo"
+    kind: "PortInfo"

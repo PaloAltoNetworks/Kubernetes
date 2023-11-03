@@ -35,6 +35,12 @@ data:
   # enable at Panorama as well.
   #PAN_GTP_ENABLED: "true"
 
+  # Start MGMT pod with GTP SW cut Through enable.
+  PAN_GTP_CUT_THRU: "false"
+
+  # Start MGMT pod with SW cut Through enable.
+  PAN_SW_CUT_THRU: "false"
+
   # Enable the advanced routing (FRR)
   #PAN_ADVANCED_ROUTING: "true"
   

@@ -1,9 +1,18 @@
 apiVersion: "paloaltonetworks.com/v1"
 kind: "PanSlotConfig"
 metadata:
+  name: "<cluster-name>-slots" # <cluster-name> should match the CLUSTER_NAME field in pan-cn-mgmt-configmap.yaml
+  namespace: kube-system
+spec:
+  slot: ""
+  slotinfo : ""
+---
+# For backward compatibility
+apiVersion: "paloaltonetworks.com/v1"
+kind: "PanSlotConfig"
+metadata:
   name: "pan-mgmt-svc-slots" # Name should match the MP service - "mpservicename-slots"
   namespace: kube-system
 spec:
   slot: ""
   slotinfo : ""
-

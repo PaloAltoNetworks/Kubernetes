@@ -22,12 +22,16 @@ Starting Kubernetes 1.22, kubernetes autoscaling/v2beta1 is deprecated. To conti
 
 ### Deploy the KEDA pods
 - Deploy the KEDA pods using "kubectl apply -f keda-2.9.0.yaml".
-- Deploy the scaled_obj.yaml file for scaling MP pods "kubectl apply -f pan-cn-hpa-mp-scaled-obj.yaml".
-- Deploy the scaled_obj.yaml file for scaling DP pods "kubectl apply -f pan-cn-hpa-dp-scaled-obj.yaml".
 - MP scaling metrics are panloggingrate, pandataplaneslots.
 - DP scaling metrics are dataplanecpuutilizationpct, dataplanepacketbufferutilization, pansessionactive, pansessionutilization,
   pansessionsslproxyutilization, panthroughput, panpacketrate, panconnectionspersecond.
 - Modify the scaled_obj.yaml files to add minReplicaCount and maxReplicaCount.
+- pan-cn-mgmt-configmap.yaml file is pre-populated with HPA_NAME as "PAN-HPA", make sure to have a unique HPA_NAME per cluster if you are deploying multiple clusters
 - Modify the pan-cn-hpa-mp-scaled-obj.yaml file with the metrics to be used for scaling MP
 - Modify the pan-cn-hpa-dp-scaled-obj.yaml file with the metrics to be used for scaling DP.
+- Make sure that the HPA NAME defined in pan-cn-mgmt-configmap.yaml file matches to the HPA NAME used in "metricId" field of pan-cn-hpa-mp-scaled-obj.yaml and pan-cn-hpa-dp-scaled-obj.yaml files
+- The metricId should be of the format customMetrics/<HPA_NAME>-pansessionactive (eg: metricId: "customMetrics/PAN-HPA-pansessionactive")
+- Modify the "targetValue" in pan-cn-hpa-mp-scaled-obj.yaml and pan-cn-hpa-dp-scaled-obj.yaml files
+- Deploy the scaled_obj.yaml file for scaling MP pods "kubectl apply -f pan-cn-hpa-mp-scaled-obj.yaml".
+- Deploy the scaled_obj.yaml file for scaling DP pods "kubectl apply -f pan-cn-hpa-dp-scaled-obj.yaml".
  

@@ -265,7 +265,7 @@ spec:
   storageClassName: pan-local-storage
   persistentVolumeReclaimPolicy: Delete
   capacity:
-    storage: 8Gi
+    storage: 16Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
@@ -296,7 +296,7 @@ spec:
   storageClassName: pan-local-storage
   persistentVolumeReclaimPolicy: Delete
   capacity:
-    storage: 8Gi
+    storage: 16Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
@@ -327,7 +327,7 @@ spec:
   storageClassName: pan-local-storage
   persistentVolumeReclaimPolicy: Delete
   capacity:
-    storage: 200Mi
+    storage: 1Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
@@ -358,7 +358,7 @@ spec:
   storageClassName: pan-local-storage
   persistentVolumeReclaimPolicy: Delete
   capacity:
-    storage: 200Mi
+    storage: 1Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce

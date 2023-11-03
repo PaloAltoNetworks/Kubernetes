@@ -283,7 +283,7 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 8Gi
+          storage: 16Gi
       # Note: Use of dynamically provisioned PVs is strongly recommend.
       # Disable storageClassName to use dynamically provisioned PVs.
       #
@@ -305,7 +305,7 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 200Mi
+          storage: 1Gi
       # Note: Use of dynamically provisioned PVs is strongly recommend.
       # Disable storageClassName to use dynamically provisioned PVs.
       #
