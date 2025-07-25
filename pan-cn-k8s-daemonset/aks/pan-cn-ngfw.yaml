@@ -77,10 +77,10 @@ spec:
             requests:
               # configurable based on desired throughput, number of running pods
               cpu: "1"
-              memory: "2Gi"
+              memory: "3Gi"
             limits:
               cpu: "1"
-              memory: "2.25Gi"
+              memory: "3.25Gi"
           volumeMounts:
           - mountPath: /opt/appinfo
             name: appinfo

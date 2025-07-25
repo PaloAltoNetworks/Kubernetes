@@ -126,10 +126,10 @@ spec:
             requests:
               # configurable based on desired logging, capacities
               cpu: "2"
-              memory: "2.0Gi"
+              memory: "5.0Gi"
             limits:
               cpu: "4"
-              memory: "4.0Gi"
+              memory: "6.0Gi"
           volumeMounts:
           - name: panlogs
             mountPath: /opt/panlogs/
